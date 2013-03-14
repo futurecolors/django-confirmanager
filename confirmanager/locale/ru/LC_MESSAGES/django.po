@@ -1,0 +1,66 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: django-confirmanager\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-03-14 14:58+0400\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Ilya Baryshev <baryshev@gmail.com>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: Russian\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%"
+"10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
+
+#: models.py:105
+msgid "e-mail confirmation"
+msgstr "подтверждение e-mail"
+
+#: models.py:106
+msgid "e-mail confirmations"
+msgstr "подтверждения e-mail"
+
+#: views.py:38
+msgid "Whoops, that link doesn't seem to be working anymore!"
+msgstr "У ссылки истёк срок годности."
+
+#: views.py:39
+msgid ""
+"Don't worry, we have sent you a new email. Please checkyour email account "
+"and use the new confirmation key."
+msgstr "Не волнуйтесь, мы заново отправили вам письмо с новой ссылкой."
+"Проверьте почту, там должна была прдити новая ссылка."
+
+#: views.py:56
+msgid ""
+"Whoops, that link doesn't work anymore! Re-send the confirmation email by "
+"logging in with the corresponding account."
+msgstr "У ссылки истёк срок годности. Чтобы подтвердить ваш email, зайдите в настройки профиля."
+
+#: views.py:61
+msgid ""
+"Whoops, that link doesn't seem to exist!  Please login and re-send the "
+"confirmation email."
+msgstr "Такой ссылки не существует. Пожалуйста войдите в настройки профиля и вызовите повторную отправку."
+
+#: views.py:72
+msgid ""
+"Thanks a lot, you've successfully confirmed your email address. Have fun!"
+msgstr "Спасибо! Вы успешно подтвердили ваш адрес email."
+
+#: views.py:76
+msgid ""
+"The email you confirmed does not belong to the account you are signed in "
+"with."
+msgstr "Вы подтвердили почту, которая принадлежит другой учётной записи."
+
+#: views.py:77
+msgid "Thanks a lot! You succesfully confirmed the email address."
+msgstr "Спасибо! Вы успешно подтвердили адрес email."
