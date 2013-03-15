@@ -8,11 +8,8 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from confirmanager.utils import get_class, get_current_domain
 
-try:
-    from django.contrib.sites.models import Site
-except ImportError:
-    pass
 try:
     from django.utils.timezone import now
 except ImportError:
@@ -20,7 +17,6 @@ except ImportError:
 from templated_email import send_templated_mail
 
 from .signals import email_confirmed
-from .utils import get_class
 
 
 class ConfirmationExpired(Exception):
@@ -42,6 +38,7 @@ class EmailConfirmationManager(models.Manager):
             confirmation.is_verified = True
             confirmation.save()
             email_confirmed.send(sender=self.model, email=confirmation.email)
+            self.delete_other_user_confirmations(user=confirmation.user)
             return confirmation
 
     def last_email_for(self, user):
@@ -62,9 +59,11 @@ class EmailConfirmationManager(models.Manager):
         return sha1(salt + email).hexdigest()
 
     def get_context(self, confirmation_key, user):
+        callable = getattr(settings, 'EMAIL_CONFIRM_DOMAIN', None)
+        domain = get_class(callable)() if callable else get_current_domain()
         return {
             'activate_url': self.get_confirmation_url(confirmation_key),
-            'site_name': self.get_current_domain(),
+            'site_name': domain,
             'user': user
         }
 
@@ -76,18 +75,16 @@ class EmailConfirmationManager(models.Manager):
                                    template_name='confirmation',
                                    context=self.get_context(confirmation_key, user))
 
-    def get_current_domain(self):
-        return Site.objects.get_current().domain
-
     def get_confirmation_url(self, confirmation_key):
-        relative_path = reverse('confirmation-view', args=[confirmation_key])
-
-        return u"http://%s%s" % (self.get_current_domain(), relative_path)
+        return reverse('confirmation-view', args=[confirmation_key])
 
     def delete_expired_confirmations(self):
         for confirmation in self.all():
             if confirmation.is_key_expired:
                 confirmation.delete()
+
+    def delete_other_user_confirmations(self, user):
+        self.filter(user=user, is_verified=False).delete()
 
 
 class EmailConfirmation(models.Model):
@@ -97,8 +94,7 @@ class EmailConfirmation(models.Model):
     confirmation_key = models.CharField(max_length=40)
     is_verified = models.BooleanField(default=False)
 
-    objects = get_class(getattr(settings, 'EMAIL_CONFIRM_MANAGER',
-                                'confirmanager.models.EmailConfirmationManager'))()
+    objects = EmailConfirmationManager()
 
     @property
     def is_key_expired(self):

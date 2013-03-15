@@ -99,7 +99,7 @@ class TestSend(TestCase):
 
     @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend',
                        DEFAULT_FROM_EMAIL='hey@bulldog.com')
-    def test_simple(self):
+    def test_send(self):
         user = UserFactory()
         email = 'foo@bar.baz'
         confirmation = EmailConfirmation.objects.send_confirmation(email, user=user)

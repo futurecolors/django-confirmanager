@@ -39,7 +39,7 @@ Settings
 * EMAIL_CONFIRMATION_EXPIRES (default 3)
 * EMAIL_CONFIRM_REDIRECT_URL
 * EMAIL_CONFIRM_LOGIN_URL
-* EMAIL_CONFIRM_MANAGER
+* EMAIL_CONFIRM_DOMAIN
 
 Signals
 =======
@@ -51,5 +51,6 @@ TODO
 
 Make evertything easily overridable (docs for manager, template)
 django-appconf
+untility for url generation
 
 .. _django-email-confirmation: https://github.com/Gidsy/django-email-confirmation

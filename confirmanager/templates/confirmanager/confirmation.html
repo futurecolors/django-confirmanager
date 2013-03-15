@@ -1,10 +1,12 @@
+{% load confirmation_utils %}
+
 {% block subject %}Email confirmation on {{ site_name }}{% endblock %}
 {% block html %}
     <p>Hello,</p>
 
     <p>Your email is set for user {{ user.username }} on site {{ site_name }}.</p>
 
-    <p>To confirm you this user please visit this link <a href="{{ activate_url }}">{{ activate_url }}</a>.</p>
+    <p>To confirm you this user please visit this link <a href="{{ activate_url|append_domain }}">{{ activate_url }}</a>.</p>
 
     <p>Thank you.</p>
 {% endblock %}

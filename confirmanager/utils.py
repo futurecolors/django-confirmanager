@@ -3,6 +3,13 @@
     https://github.com/dcramer/mock-django/blob/master/mock_django/signals.py """
 import contextlib
 import mock
+from django.conf import settings
+
+
+try:
+    from django.contrib.sites.models import Site
+except ImportError:
+    pass
 
 
 def get_class(class_string):
@@ -31,6 +38,16 @@ def get_mod_func(class_string):
     except ValueError:
         return class_string, ''
     return class_string[:dot], class_string[dot + 1:]
+
+
+def get_current_domain():
+    return Site.objects.get_current().domain
+
+
+def get_absolute_url(path):
+    callable = getattr(settings, 'EMAIL_CONFIRM_DOMAIN', None)
+    domain = get_class(callable)() if callable else get_current_domain()
+    return 'http://%s%s' % (domain, path)
 
 
 @contextlib.contextmanager
