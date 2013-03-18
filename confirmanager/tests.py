@@ -110,8 +110,8 @@ class TestSend(TestCase):
         self.assertEqual('hey@bulldog.com', mail.outbox[0].from_email)
 
 
-@override_settings(EMAIL_CONFIRM_REDIRECT_URL='/REDIRECT_URL/',
-                   EMAIL_CONFIRM_LOGIN_URL='/LOGIN_URL/',)
+@override_settings(CONFIRMANAGER_REDIRECT_URL='/REDIRECT_URL/',
+                   CONFIRMANAGER_LOGIN_URL='/LOGIN_URL/',)
 class TestViewExpired(TestCase):
 
     def setUp(self):
@@ -132,8 +132,8 @@ class TestViewExpired(TestCase):
         self.assertFalse(EmailConfirmation.objects.get(email='hello@bar.com').is_key_expired)
 
 
-@override_settings(EMAIL_CONFIRM_REDIRECT_URL='/REDIRECT_URL/',
-                   EMAIL_CONFIRM_LOGIN_URL='/LOGIN_URL/',)
+@override_settings(CONFIRMANAGER_REDIRECT_URL='/REDIRECT_URL/',
+                   CONFIRMANAGER_LOGIN_URL='/LOGIN_URL/',)
 class TestViewMissing(TestCase):
 
     def test_handle_missing_authenticated(self):
@@ -147,8 +147,8 @@ class TestViewMissing(TestCase):
         self.assertRedirects(response, '/LOGIN_URL/?next=/REDIRECT_URL/')
 
 
-@override_settings(EMAIL_CONFIRM_REDIRECT_URL='/REDIRECT_URL/',
-                   EMAIL_CONFIRM_LOGIN_URL='/LOGIN_URL/',)
+@override_settings(CONFIRMANAGER_REDIRECT_URL='/REDIRECT_URL/',
+                   CONFIRMANAGER_LOGIN_URL='/LOGIN_URL/',)
 class TestViewOk(TestCase):
 
     def setUp(self):

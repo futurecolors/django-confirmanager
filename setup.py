@@ -7,7 +7,7 @@ read = lambda filepath: codecs.open(filepath, 'r', 'utf-8').read()
 
 setup(
     name='django-confirmanager',
-    version='0.1',
+    version='0.1.1',
     author='Ilya Baryshev',
     author_email='baryshev@gmail.com',
     packages=find_packages(exclude="tests"),

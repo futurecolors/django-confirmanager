@@ -25,8 +25,8 @@ class ConfirmEmail(View):
             return self.handle_ok(confirmation)
 
     def populate_context(self):
-        self.next_url = settings.EMAIL_CONFIRM_REDIRECT_URL
-        self.login_url = settings.EMAIL_CONFIRM_LOGIN_URL
+        self.next_url = settings.CONFIRMANAGER_REDIRECT_URL
+        self.login_url = settings.CONFIRMANAGER_LOGIN_URL
 
     def handle_expired(self):
         """ If we can, find a expired email confirmation
