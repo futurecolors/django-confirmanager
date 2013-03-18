@@ -59,7 +59,7 @@ class EmailConfirmationManager(models.Manager):
         return sha1(salt + email).hexdigest()
 
     def get_context(self, confirmation_key, user):
-        callable = getattr(settings, 'EMAIL_CONFIRM_DOMAIN', None)
+        callable = getattr(settings, 'CONFIRMANAGER_GET_DOMAIN', None)
         domain = get_class(callable)() if callable else get_current_domain()
         return {
             'activate_url': self.get_confirmation_url(confirmation_key),
@@ -98,7 +98,7 @@ class EmailConfirmation(models.Model):
 
     @property
     def is_key_expired(self):
-        confirm_timedelta = datetime.timedelta(days=getattr(settings, 'EMAIL_CONFIRMATION_EXPIRES', 3))
+        confirm_timedelta = datetime.timedelta(days=getattr(settings, 'CONFIRMANAGER_EXPIRES', 3))
         expiration_date = self.sent_on + confirm_timedelta
         return expiration_date <= now()
 

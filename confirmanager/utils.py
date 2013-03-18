@@ -45,7 +45,7 @@ def get_current_domain():
 
 
 def get_absolute_url(path):
-    callable = getattr(settings, 'EMAIL_CONFIRM_DOMAIN', None)
+    callable = getattr(settings, 'CONFIRMANAGER_GET_DOMAIN', None)
     domain = get_class(callable)() if callable else get_current_domain()
     return 'http://%s%s' % (domain, path)
 

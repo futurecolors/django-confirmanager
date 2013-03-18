@@ -14,7 +14,7 @@ from .factories import ConfirmationFactory, UserFactory
 
 
 @patch('confirmanager.models.now')
-@override_settings(EMAIL_CONFIRMATION_EXPIRES=3)
+@override_settings(CONFIRMANAGER_EXPIRES=3)
 class TestModel(TestCase):
 
     def test_is_key_expired(self, mock_now):
@@ -28,7 +28,7 @@ class TestModel(TestCase):
         self.assertFalse(not_expired.is_key_expired)
 
 
-@override_settings(EMAIL_CONFIRMATION_EXPIRES=3)
+@override_settings(CONFIRMANAGER_EXPIRES=3)
 class TestManager(TestCase):
 
     @patch('confirmanager.models.now')

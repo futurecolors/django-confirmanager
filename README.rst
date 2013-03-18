@@ -40,10 +40,10 @@ Limitations
 Settings
 ========
 
-* EMAIL_CONFIRMATION_EXPIRES (default 3)
-* EMAIL_CONFIRM_REDIRECT_URL
-* EMAIL_CONFIRM_LOGIN_URL
-* EMAIL_CONFIRM_DOMAIN
+* CONFIRMANAGER_EXPIRES (default 3) - how long links for email confirmation live
+* CONFIRMANAGER_REDIRECT_URL - where to redirect after email is confirmed
+* CONFIRMANAGER_LOGIN_URL - where to redirect if user is not authenticated
+* CONFIRMANAGER_GET_DOMAIN - override default django.contrib.sites behavior to get current domain
 
 Signals
 =======
@@ -53,8 +53,7 @@ Signals
 TODO
 ====
 
-Make evertything easily overridable (docs for manager, template)
-django-appconf
-untility for url generation
+* Make evertything easily overridable (docs for manager, template)
+* django-appconf
 
 .. _django-email-confirmation: https://github.com/Gidsy/django-email-confirmation
