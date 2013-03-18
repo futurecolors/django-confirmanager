@@ -1,2 +1,4 @@
 include *.txt
 include *.rst
+recursive-include confirmanager/locale *
+recursive-include confirmanager/templates *
