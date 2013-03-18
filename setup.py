@@ -18,11 +18,6 @@ setup(
     install_requires=[
         'django-templated-email>=0.4.7,<0.5',
     ],
-    test_requires=[
-        'factory_boy>=1.3',
-        'mock>=1.0.0',
-        'django-discover-runner>=0.3'
-    ],
     classifiers = [
         'Development Status :: 3 - Alpha',
         'Framework :: Django',
