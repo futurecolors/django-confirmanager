@@ -1,11 +1,11 @@
 # coding: utf-8
 import datetime
+from mock import patch, ANY
+
 from django.core.urlresolvers import reverse
 from django.test.utils import override_settings
-
-from mock import patch
 from django.test import TestCase
-import mock
+from django.contrib.auth.models import User
 
 from .utils import mock_signal_receiver
 from .models import EmailConfirmation, ConfirmationExpired
@@ -62,7 +62,7 @@ class TestDoConfirm(TestCase):
         with mock_signal_receiver(email_confirmed) as receiver_mock:
             result = EmailConfirmation.objects.confirm(self.confirmation.confirmation_key)
             self.assertIsConfirmed(result, self.confirmation)
-            receiver_mock.assert_called_once_with(signal=mock.ANY, email=self.email_address, sender=mock.ANY)
+            receiver_mock.assert_called_once_with(signal=ANY, email=self.email_address, sender=ANY)
 
     def test_confirm_email_not_exists(self):
         with mock_signal_receiver(email_confirmed) as receiver_mock:
@@ -152,22 +152,49 @@ class TestViewMissing(TestCase):
 class TestViewOk(TestCase):
 
     def setUp(self):
-        self.confirmation = ConfirmationFactory(email='hello@bar.com', user__email='foo@bar.com')
+        self.new_email = 'hello@bar.com'
+        self.old_email = 'foo@bar.com'
+        self.confirmation = ConfirmationFactory(email=self.new_email, user__email=self.old_email)
+
+    def assertIsConfirmed(self):
+        self.assertTrue(EmailConfirmation.objects.get(pk=self.confirmation.pk).is_verified)
+        self.assertEqual(User.objects.get(pk=self.confirmation.user.pk).email, self.new_email)
 
     def test_handle_ok_authenticated(self):
         self.assertTrue(self.client.login(username=self.confirmation.user.username, password='1234'))
         response = self.client.get(reverse('confirmation-view', args=[self.confirmation.confirmation_key]))
         self.assertRedirects(response, '/REDIRECT_URL/')
-        self.assertTrue(EmailConfirmation.objects.get(pk=self.confirmation.pk).is_verified)
+        self.assertIsConfirmed()
 
     def test_handle_ok_anonymous(self):
         self.client.logout()
         response = self.client.get(reverse('confirmation-view', args=[self.confirmation.confirmation_key]))
         self.assertRedirects(response, '/LOGIN_URL/?email=hello@bar.com&next=/REDIRECT_URL/')
-        self.assertTrue(EmailConfirmation.objects.get(pk=self.confirmation.pk).is_verified)
+        self.assertIsConfirmed()
 
     def test_handle_ok_another_user(self):
-        self.assertTrue(self.client.login(username=self.confirmation.user.username, password='1234'))
+        self.assertTrue(self.client.login(username=UserFactory(), password='1234'))
         response = self.client.get(reverse('confirmation-view', args=[self.confirmation.confirmation_key]))
         self.assertRedirects(response, '/REDIRECT_URL/')
-        self.assertTrue(EmailConfirmation.objects.get(pk=self.confirmation.pk).is_verified)
+        self.assertIsConfirmed()
+
+
+@override_settings(CONFIRMANAGER_REDIRECT_URL='/REDIRECT_URL/',
+                   CONFIRMANAGER_LOGIN_URL='/LOGIN_URL/',)
+class TestDoubleConfirm(TestCase):
+
+    def setUp(self):
+        self.new_email = 'hello@bar.com'
+        self.old_email = 'foo@bar.com'
+        self.confirmation = ConfirmationFactory(email=self.new_email, user__email=self.old_email, is_verified=True)
+
+    def test_confirm_twice_anonymous(self):
+        response = self.client.get(reverse('confirmation-view', args=[self.confirmation.confirmation_key]))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(User.objects.get(pk=self.confirmation.user.pk).email, self.old_email)  # email NOT changed
+
+    def test_confirm_twice_authenticated(self):
+        self.assertTrue(self.client.login(username=self.confirmation.user.username, password='1234'))
+        response = self.client.get(reverse('confirmation-view', args=[self.confirmation.confirmation_key]))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(User.objects.get(pk=self.confirmation.user.pk).email, self.old_email)  # email NOT changed
