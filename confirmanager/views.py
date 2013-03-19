@@ -5,7 +5,7 @@ from django.shortcuts import redirect
 from django.views.generic import View
 from django.utils.translation import ugettext as _
 
-from .models import EmailConfirmation, ConfirmationExpired
+from .models import EmailConfirmation, ConfirmationExpired, ConfirmationAlreadyVerified
 
 
 class ConfirmEmail(View):
@@ -18,6 +18,8 @@ class ConfirmEmail(View):
             confirmation = EmailConfirmation.objects.confirm(confirmation_key)
         except ConfirmationExpired:
             return self.handle_expired()
+        except ConfirmationAlreadyVerified:
+            return self.handle_already_verified()
 
         if not confirmation:
             return self.handle_missing_code()
@@ -49,6 +51,25 @@ class ConfirmEmail(View):
                                                      confirmation.user.email,
                                                      self.next_url))
 
+    def handle_already_verified(self):
+        """ Confirmation was verified but somebody clicked the link again,
+            doing nothing, except notification
+
+            TODO: refactor  handle_expired & handle_already_verified
+        """
+        confirmation = EmailConfirmation.objects.get(confirmation_key=self.confirmation_key)
+
+        messages.warning(self.request, _("Whoops, that link doesn't seem to be working anymore!"))
+        if self.request.user.is_authenticated():
+            # if user is logged in, we want to show the error message on account page
+            return redirect(self.next_url)
+        else:
+            # otherwise we display the error on the login page, prefill the email
+            return redirect("%s?email=%s&next=%s" % (self.login_url,
+                                                     confirmation.user.email,
+                                                     self.next_url))
+
+
     def handle_missing_code(self):
         """ If not then it was the wrong, code. the view takes care of that """
         if self.request.user.is_authenticated():
@@ -62,6 +83,7 @@ class ConfirmEmail(View):
             messages.warning(self.request, _("Whoops, that link doesn't seem to exist!  Please login "
                                              "and re-send the confirmation email."))
             return redirect("%s?next=%s" % (self.login_url, self.next_url))
+
 
     def handle_ok(self, confirmation):
         """ The email was confirmed, now it depends if user is logged in

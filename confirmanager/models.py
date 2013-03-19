@@ -23,6 +23,10 @@ class ConfirmationExpired(Exception):
     pass
 
 
+class ConfirmationAlreadyVerified(Exception):
+    pass
+
+
 class EmailConfirmationManager(models.Manager):
 
     def confirm(self, confirmation_key):
@@ -30,6 +34,8 @@ class EmailConfirmationManager(models.Manager):
             confirmation = self.get(confirmation_key=confirmation_key)
         except self.model.DoesNotExist:
             return None
+        if confirmation.is_verified:  # double activation
+            raise ConfirmationAlreadyVerified
         if confirmation.is_key_expired:
             raise ConfirmationExpired
         else:
