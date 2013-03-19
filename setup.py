@@ -7,10 +7,11 @@ read = lambda filepath: codecs.open(filepath, 'r', 'utf-8').read()
 
 setup(
     name='django-confirmanager',
-    version='0.1.2',
+    version='0.1.3',
     author='Ilya Baryshev',
     author_email='baryshev@gmail.com',
     packages=find_packages(exclude="tests"),
+    include_package_data=True,
     url='https://github.com/futurecolors/django-confirmanager',
     license='MIT',
     description="Simple email confirmation application.",
