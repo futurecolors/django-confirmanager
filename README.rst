@@ -58,5 +58,6 @@ TODO
 
 * Make evertything easily overridable (docs for manager, template)
 * django-appconf
+* Django 1.5
 
 .. _django-email-confirmation: https://github.com/Gidsy/django-email-confirmation
