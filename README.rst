@@ -3,6 +3,9 @@ Simple email confirmation application for django 1.4. Forked from `django-email-
 .. image:: https://travis-ci.org/futurecolors/django-confirmanager.png?branch=master
     :target: https://travis-ci.org/futurecolors/django-confirmanager
 
+.. image:: https://coveralls.io/repos/futurecolors/django-confirmanager/badge.png?branch=master
+    :target: https://coveralls.io/r/futurecolors/django-confirmanager/
+
 
 Install
 =======

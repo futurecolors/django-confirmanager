@@ -12,3 +12,4 @@ pip-log.txt
 /test/reports/
 /reports/
 .noseids
+.coverage
