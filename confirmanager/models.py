@@ -6,7 +6,7 @@ from hashlib import sha1
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.db import models
+from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 from confirmanager.utils import get_class, get_current_domain
 
@@ -39,13 +39,21 @@ class EmailConfirmationManager(models.Manager):
         if confirmation.is_key_expired:
             raise ConfirmationExpired
         else:
-            confirmation.user.email = confirmation.email
-            confirmation.user.save()
-            confirmation.is_verified = True
-            confirmation.save()
-            email_confirmed.send(sender=self.model, email=confirmation.email)
-            self.delete_other_user_confirmations(user=confirmation.user)
-            return confirmation
+            with transaction.commit_on_success():
+                # Django does not enforce unique emails, we can do this without changing the db
+                unique_email_check = getattr(settings, 'CONFIRMANAGER_UNIQUE_EMAILS', True)
+                if unique_email_check:
+                    email_is_occupied = (User.objects.filter(email=confirmation.email)
+                                                     .exclude(pk=confirmation.user.pk).exists())
+                    if email_is_occupied:
+                        raise ConfirmationAlreadyVerified
+                confirmation.user.email = confirmation.email
+                confirmation.user.save()
+                confirmation.is_verified = True
+                confirmation.save()
+                email_confirmed.send(sender=self.model, email=confirmation.email)
+                self.delete_other_user_confirmations(user=confirmation.user)
+                return confirmation
 
     def last_email_for(self, user):
         confirmations = self.filter(user=user, is_verified=False)
@@ -109,7 +117,11 @@ class EmailConfirmation(models.Model):
         return expiration_date <= now()
 
     def __unicode__(self):
-        return u"for {0}".format(self.email)
+        return self.__repr__()
+
+    def __repr__(self):
+        return "EmailConfirmation for <{0}> ({1})".format(self.email,
+                                                          'verified' if self.is_verified else 'unverified')
 
     class Meta:
         verbose_name = _("e-mail confirmation")

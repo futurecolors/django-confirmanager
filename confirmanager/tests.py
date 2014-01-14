@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 
 from .utils import mock_signal_receiver
-from .models import EmailConfirmation, ConfirmationExpired
+from .models import EmailConfirmation, ConfirmationExpired, ConfirmationAlreadyVerified
 from .signals import email_confirmed
 from .factories import ConfirmationFactory, UserFactory
 
@@ -37,7 +37,8 @@ class TestManager(TestCase):
         expired = ConfirmationFactory(sent_on=datetime.datetime(1980, 1, 1), email='foo@bar.com')
         not_expired = ConfirmationFactory(sent_on=datetime.datetime(2020, 1, 1), email='baz@bar.com')
         EmailConfirmation.objects.delete_expired_confirmations()
-        self.assertQuerysetEqual(EmailConfirmation.objects.all(), ['<EmailConfirmation: for baz@bar.com>'])
+        self.assertQuerysetEqual(EmailConfirmation.objects.all(),
+                                 ['EmailConfirmation for <baz@bar.com> (unverified)'])
 
 
 class TestDoConfirm(TestCase):
@@ -121,14 +122,16 @@ class TestViewExpired(TestCase):
         self.assertTrue(self.client.login(username=self.confirmation.user.username, password='1234'))
         response = self.client.get(reverse('confirmation-view', args=[self.confirmation.confirmation_key]))
         self.assertRedirects(response, '/REDIRECT_URL/')
-        self.assertQuerysetEqual(EmailConfirmation.objects.all(), ['<EmailConfirmation: for hello@bar.com>'])
+        self.assertQuerysetEqual(EmailConfirmation.objects.all(),
+                                 ['EmailConfirmation for <hello@bar.com> (unverified)'])
         self.assertFalse(EmailConfirmation.objects.get(email='hello@bar.com').is_key_expired)
 
     def test_handle_expired_anonymous(self):
         self.client.logout()
         response = self.client.get(reverse('confirmation-view', args=[self.confirmation.confirmation_key]))
         self.assertRedirects(response, '/LOGIN_URL/?email=foo@bar.com&next=/REDIRECT_URL/')
-        self.assertQuerysetEqual(EmailConfirmation.objects.all(), ['<EmailConfirmation: for hello@bar.com>'])
+        self.assertQuerysetEqual(EmailConfirmation.objects.all(),
+                                 ['EmailConfirmation for <hello@bar.com> (unverified)'])
         self.assertFalse(EmailConfirmation.objects.get(email='hello@bar.com').is_key_expired)
 
 
@@ -198,3 +201,20 @@ class TestDoubleConfirm(TestCase):
         response = self.client.get(reverse('confirmation-view', args=[self.confirmation.confirmation_key]))
         self.assertEqual(response.status_code, 302)
         self.assertEqual(User.objects.get(pk=self.confirmation.user.pk).email, self.old_email)  # email NOT changed
+
+
+class SimultaneousConfirm(TestCase):
+
+    def test_email_doubles(self):
+        self.offending_email = 'double@email.com'
+        confirm1 = ConfirmationFactory(email=self.offending_email, user__email='foo@bar.com', is_verified=False)
+        confirm2 = ConfirmationFactory(email=self.offending_email, user__email='baz@bunny.com', is_verified=False)
+
+        c1 = EmailConfirmation.objects.confirm(confirm1.confirmation_key)
+        self.assertRaises(ConfirmationAlreadyVerified, EmailConfirmation.objects.confirm, confirm2.confirmation_key)
+
+        user1 = User.objects.get(pk=confirm1.user.pk)
+        user2 = User.objects.get(pk=confirm2.user.pk)
+
+        self.assertEqual(user1.email, self.offending_email)
+        self.assertEqual(user2.email, 'baz@bunny.com', 'has not changed')

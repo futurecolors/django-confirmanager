@@ -47,6 +47,7 @@ Settings
 * CONFIRMANAGER_REDIRECT_URL - where to redirect after email is confirmed
 * CONFIRMANAGER_LOGIN_URL - where to redirect if user is not authenticated
 * CONFIRMANAGER_GET_DOMAIN - override default django.contrib.sites behavior to get current domain
+* CONFIRMANAGER_UNIQUE_EMAILS (defaut True) - extra check for unique emails
 
 Signals
 =======
