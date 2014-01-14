@@ -7,7 +7,7 @@ read = lambda filepath: codecs.open(filepath, 'r', 'utf-8').read()
 
 setup(
     name='django-confirmanager',
-    version='0.2',
+    version='0.3',
     author='Ilya Baryshev',
     author_email='baryshev@gmail.com',
     packages=find_packages(exclude="tests"),
@@ -19,7 +19,7 @@ setup(
     install_requires=[
         'django-templated-email>=0.4.7,<0.5',
     ],
-    classifiers = [
+    classifiers=[
         'Development Status :: 3 - Alpha',
         'Framework :: Django',
         'Intended Audience :: Developers',
