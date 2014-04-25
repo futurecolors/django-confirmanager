@@ -45,7 +45,7 @@ class TestDoConfirm(TestCase):
 
     def setUp(self):
         self.email_address = 'foo@bar.com'
-        self.confirmation = ConfirmationFactory(email=self.email_address)
+        self.confirmation = ConfirmationFactory(email=self.email_address, user__email='dummy@email.com')
 
     def assertIsConfirmed(self, result, confirmation):
         self.assertEqual(result, confirmation)
@@ -63,7 +63,10 @@ class TestDoConfirm(TestCase):
         with mock_signal_receiver(email_confirmed) as receiver_mock:
             result = EmailConfirmation.objects.confirm(self.confirmation.confirmation_key)
             self.assertIsConfirmed(result, self.confirmation)
-            receiver_mock.assert_called_once_with(signal=ANY, email=self.email_address, sender=ANY)
+            receiver_mock.assert_called_once_with(signal=ANY,
+                                                  email=self.email_address,
+                                                  previous_email='dummy@email.com',
+                                                  sender=ANY)
 
     def test_confirm_email_not_exists(self):
         with mock_signal_receiver(email_confirmed) as receiver_mock:
