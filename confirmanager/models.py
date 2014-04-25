@@ -47,11 +47,12 @@ class EmailConfirmationManager(models.Manager):
                                                      .exclude(pk=confirmation.user.pk).exists())
                     if email_is_occupied:
                         raise ConfirmationAlreadyVerified
+                previous_email = confirmation.user.email
                 confirmation.user.email = confirmation.email
                 confirmation.user.save()
                 confirmation.is_verified = True
                 confirmation.save()
-                email_confirmed.send(sender=self.model, email=confirmation.email)
+                email_confirmed.send(sender=self.model, email=confirmation.email, previous_email=previous_email)
                 self.delete_other_user_confirmations(user=confirmation.user)
                 return confirmation
 
